@@ -32,20 +32,22 @@ export default async function DashboardPage({
 
   return (
     <div className="container mx-auto space-y-6 p-4">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-bold">Events Dashboard</h1>
         <div className="flex items-center gap-2">
           <form action={handleSignOut} className="relative">
             <FormPendingOverlay label="Signing out" />
-            <Button type="submit" variant="outline" size="icon" aria-label="Logout">
+            <Button type="submit" variant="outline" size="sm" aria-label="Logout">
               <LogOut className="h-4 w-4" />
-              <span className="sr-only">Logout</span>
+              <span className="hidden sm:inline">Logout</span>
+              <span className="sr-only sm:hidden">Logout</span>
             </Button>
           </form>
           <Link href="/events/new">
-            <Button size="icon" aria-label="Create event">
+            <Button size="sm" aria-label="Create event">
               <Plus className="h-4 w-4" />
-              <span className="sr-only">Create event</span>
+              <span className="hidden sm:inline">Create event</span>
+              <span className="sr-only sm:hidden">Create event</span>
             </Button>
           </Link>
         </div>
