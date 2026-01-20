@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { AUTH_ERROR_OAUTH_FAILED } from "@/lib/validation/auth";
@@ -7,6 +7,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
+  const next = searchParams.get("next") ?? "/dashboard";
 
   // Handle OAuth errors from the provider
   if (error) {
@@ -18,20 +19,27 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
-  // Create Supabase client with direct cookie access for Route Handler
+  // Create response object first so we can set cookies on it
+  const response = NextResponse.redirect(`${origin}${next}`);
   const cookieStore = await cookies();
+
+  // Create Supabase client with cookie handlers that set cookies on the response
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() {
-          return cookieStore.getAll();
+        get(name: string) {
+          return cookieStore.get(name)?.value;
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
+        set(name: string, value: string, options: CookieOptions) {
+          // Set cookies on both the cookie store and the response object
+          cookieStore.set(name, value, options);
+          response.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          cookieStore.set(name, "", { ...options, maxAge: 0 });
+          response.cookies.set({ name, value: "", ...options });
         },
       },
     }
@@ -44,6 +52,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
-  // Redirect to dashboard after successful authentication
-  return NextResponse.redirect(`${origin}/dashboard`);
+  // Return the response with cookies set
+  return response;
 }
