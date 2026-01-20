@@ -13,7 +13,7 @@ export function DashboardSkeleton() {
       {/* Mobile: Card skeleton */}
       <div className="md:hidden space-y-4">
         {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i}>
+          <Card key={i} className="bg-card/60 backdrop-blur-sm">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <Skeleton className="h-5 w-48" />
@@ -30,7 +30,7 @@ export function DashboardSkeleton() {
 
       {/* Desktop: Table skeleton */}
       <div className="hidden md:block">
-        <div className="border rounded-md">
+        <div className="border rounded-md bg-card/60 backdrop-blur-sm">
           <div className="border-b px-4 py-3">
             <div className="flex gap-4">
               <Skeleton className="h-4 w-32" />

@@ -56,7 +56,7 @@ export function DashboardFilters({
         value={searchValue}
         onChange={(event) => setSearchValue(event.target.value)}
         autoComplete="off"
-        className="min-w-[220px] flex-1"
+        className="min-w-[220px] flex-1 bg-white dark:bg-white"
         aria-label="Search events"
       />
       <input type="hidden" name="sport" value={hiddenSportValue} />

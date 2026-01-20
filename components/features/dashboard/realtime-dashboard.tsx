@@ -135,7 +135,7 @@ export function DashboardRealtime({
       <div className="relative">
         {isPending && (
           <div
-            className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/80 text-foreground backdrop-blur-sm"
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/40 text-foreground backdrop-blur-md"
             role="status"
             aria-live="polite"
           >

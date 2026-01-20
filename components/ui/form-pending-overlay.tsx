@@ -22,7 +22,7 @@ export function FormPendingOverlay({
   return (
     <div
       className={cn(
-        "absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/80 text-foreground backdrop-blur-sm",
+        "absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/40 text-foreground backdrop-blur-md",
         className
       )}
       role="status"

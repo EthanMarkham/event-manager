@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Table as UITable,
   TableBody,
@@ -21,6 +24,8 @@ export function DashboardTable({
   events,
   hasActiveFilters = false,
 }: DashboardTableProps) {
+  const router = useRouter();
+
   if (events.length === 0) {
     return <DashboardEmptyState variant={hasActiveFilters ? "no-results" : "no-events"} />;
   }
@@ -38,14 +43,15 @@ export function DashboardTable({
         </TableHeader>
         <TableBody>
           {events.map((event) => (
-            <TableRow key={event.id}>
+            <TableRow
+              key={event.id}
+              className="cursor-pointer"
+              onClick={() => {
+                router.push(`/events/${event.id}/edit`);
+              }}
+            >
               <TableCell>
-                <Link
-                  href={`/events/${event.id}/edit`}
-                  className="font-medium text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded"
-                >
-                  {event.name}
-                </Link>
+                <span className="font-medium text-primary">{event.name}</span>
               </TableCell>
               <TableCell>
                 <Badge variant="secondary">{event.sport_type}</Badge>
