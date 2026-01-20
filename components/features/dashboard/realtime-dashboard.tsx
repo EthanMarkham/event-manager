@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DashboardFilters } from "./filters";
 import { DashboardList } from "./list";
 import { DashboardTable } from "./table";
@@ -8,22 +9,20 @@ import type { EventWithVenues } from "@/lib/validation/db";
 import { useDashboardEvents } from "@/lib/hooks/use-dashboard-events";
 import { realtimeSubscriptionService } from "@/lib/services/realtime-subscription";
 import { logger } from "@/lib/utils/logger";
+import { Loader2 } from "@/lib/ui/icons";
 
 type DashboardRealtimeProps = {
   initialEvents: EventWithVenues[];
   userId: string;
-  searchQuery?: string;
-  sportFilter?: string;
-  filtersAction: (formData: FormData) => void | Promise<void>;
 };
 
 export function DashboardRealtime({
   initialEvents,
   userId,
-  searchQuery,
-  sportFilter,
-  filtersAction,
 }: DashboardRealtimeProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
   const {
     events,
     upsertEvent,
@@ -81,8 +80,30 @@ export function DashboardRealtime({
     updateVenue,
   ]);
 
-  const normalizedSearchQuery = searchQuery?.trim().toLowerCase() ?? "";
-  const normalizedSportFilter = sportFilter?.trim() ?? "";
+  const searchQuery = searchParams.get("q")?.trim() ?? "";
+  const sportFilter = searchParams.get("sport")?.trim() ?? "";
+  const normalizedSearchQuery = searchQuery.toLowerCase();
+  const normalizedSportFilter = sportFilter;
+
+  const handleFiltersSubmit = (formData: FormData) => {
+    const nextSearchQuery = formData.get("q")?.toString().trim() ?? "";
+    const nextSportFilter = formData.get("sport")?.toString().trim() ?? "";
+    const params = new URLSearchParams();
+
+    if (nextSearchQuery) {
+      params.set("q", nextSearchQuery);
+    }
+
+    if (nextSportFilter) {
+      params.set("sport", nextSportFilter);
+    }
+
+    const queryString = params.toString();
+    const nextUrl = queryString ? `/dashboard?${queryString}` : "/dashboard";
+    startTransition(() => {
+      router.push(nextUrl);
+    });
+  };
 
   const filteredEvents = useMemo(() => {
     if (!normalizedSearchQuery && !normalizedSportFilter) {
@@ -109,13 +130,25 @@ export function DashboardRealtime({
       <DashboardFilters
         searchQuery={searchQuery}
         sportFilter={sportFilter}
-        filtersAction={filtersAction}
+        onSubmit={handleFiltersSubmit}
       />
-      <div className="md:hidden">
-        <DashboardList events={filteredEvents} hasActiveFilters={hasActiveFilters} />
-      </div>
-      <div className="hidden md:block">
-        <DashboardTable events={filteredEvents} hasActiveFilters={hasActiveFilters} />
+      <div className="relative">
+        {isPending && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-background/80 text-foreground backdrop-blur-sm"
+            role="status"
+            aria-live="polite"
+          >
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span className="sr-only">Updating events</span>
+          </div>
+        )}
+        <div className="md:hidden">
+          <DashboardList events={filteredEvents} hasActiveFilters={hasActiveFilters} />
+        </div>
+        <div className="hidden md:block">
+          <DashboardTable events={filteredEvents} hasActiveFilters={hasActiveFilters} />
+        </div>
       </div>
     </div>
   );
