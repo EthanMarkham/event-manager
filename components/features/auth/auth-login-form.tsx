@@ -84,11 +84,10 @@ export function AuthLoginForm({
       const supabase = getBrowserClient();
       const siteUrl = window.location.origin;
 
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${siteUrl}/auth/callback`,
-          skipBrowserRedirect: true,
         },
       });
 
@@ -96,13 +95,6 @@ export function AuthLoginForm({
         toast.error(error.message);
         return;
       }
-
-      if (data?.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      toast.error("Failed to initiate Google sign-in.");
     });
   }
 
