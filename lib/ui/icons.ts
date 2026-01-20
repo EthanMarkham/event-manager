@@ -15,6 +15,7 @@ export {
   OctagonXIcon,
   Plus,
   SearchX,
+  SlidersHorizontal,
   Trash2,
   TriangleAlertIcon,
   XIcon,

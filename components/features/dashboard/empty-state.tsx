@@ -20,7 +20,9 @@ export function DashboardEmptyState({
           Try adjusting your filters or search terms to find what you&apos;re looking for.
         </p>
         <Link href="/dashboard">
-          <Button variant="outline">Clear filters</Button>
+        <Button variant="outline" className="w-full sm:w-auto">
+          Clear filters
+        </Button>
         </Link>
       </div>
     );
@@ -37,7 +39,7 @@ export function DashboardEmptyState({
         venues, and start time.
       </p>
       <Link href="/events/new">
-        <Button>Create Your First Event</Button>
+        <Button className="w-full sm:w-auto">Create Your First Event</Button>
       </Link>
     </div>
   );

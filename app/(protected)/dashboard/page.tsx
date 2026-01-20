@@ -35,13 +35,18 @@ export default async function DashboardPage({
         <h1 className="text-3xl font-bold">Events Dashboard</h1>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <form action={handleSignOut}>
-            <Button type="submit" variant="outline" size="sm" className="w-full sm:w-auto">
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm"
+              className="h-11 w-full text-base sm:h-8 sm:w-auto sm:text-sm"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
           </form>
           <Link href="/events/new">
-            <Button className="w-full sm:w-auto">
+            <Button className="h-11 w-full text-base sm:h-9 sm:w-auto sm:text-sm">
               <Plus className="mr-2 h-4 w-4" />
               Create Event
             </Button>
