@@ -14,6 +14,7 @@ type DashboardRealtimeProps = {
   userId: string;
   searchQuery?: string;
   sportFilter?: string;
+  filtersAction: (formData: FormData) => void | Promise<void>;
 };
 
 export function DashboardRealtime({
@@ -21,6 +22,7 @@ export function DashboardRealtime({
   userId,
   searchQuery,
   sportFilter,
+  filtersAction,
 }: DashboardRealtimeProps) {
   const {
     events,
@@ -87,6 +89,7 @@ export function DashboardRealtime({
         key={`${searchQuery ?? ""}-${sportFilter ?? "all"}`}
         searchQuery={searchQuery}
         sportFilter={sportFilter}
+        filtersAction={filtersAction}
       />
       <div className="md:hidden">
         <DashboardList events={events} hasActiveFilters={hasActiveFilters} />

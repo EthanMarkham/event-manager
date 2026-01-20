@@ -14,6 +14,7 @@ export {
   MapPin,
   OctagonXIcon,
   Plus,
+  Search,
   SearchX,
   SlidersHorizontal,
   Trash2,
