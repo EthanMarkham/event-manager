@@ -8,9 +8,9 @@ import { getEventForEdit } from "@/lib/queries/events";
 export default async function EditEventPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
 
   // `(protected)` layout has already enforced authentication.
   // We only need the current user id here for scoping the query.

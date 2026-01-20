@@ -9,9 +9,10 @@ type SearchParams = {
 export default async function AuthCallbackPage({
   searchParams,
 }: {
-  searchParams?: SearchParams;
+  searchParams?: Promise<SearchParams>;
 }) {
-  const code = searchParams?.code;
+  const resolvedSearchParams = await searchParams;
+  const code = resolvedSearchParams?.code;
 
   if (code) {
     const result = await exchangeOAuthCode(code);

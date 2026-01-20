@@ -73,6 +73,7 @@ export async function getEventForEdit(
     return { ok: false, error: "query_failed" };
   }
   if (!event) {
+    logger.error("Event not found", { eventId, userId });
     return { ok: false, error: "not_found" };
   }
 
