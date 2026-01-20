@@ -8,13 +8,24 @@ export async function getServerUser() {
   const supabase = await createClient();
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+  
+  if (error) {
+    console.error("[Auth] Error getting user:", error.message);
+  } else if (user) {
+    console.log("[Auth] User found:", user.email);
+  } else {
+    console.log("[Auth] No user session found");
+  }
+  
   return user;
 }
 
 export async function requireServerUser(redirectTo = "/login") {
   const user = await getServerUser();
   if (!user) {
+    console.log(`[Auth] Redirecting to ${redirectTo} - no authenticated user`);
     redirect(redirectTo);
   }
   return user;

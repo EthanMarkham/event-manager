@@ -9,13 +9,17 @@ export async function GET(request: Request) {
   const error = searchParams.get("error");
   const next = searchParams.get("next") ?? "/dashboard";
 
+  console.log("[OAuth Callback] Request received", { code: !!code, error, origin });
+
   // Handle OAuth errors from the provider
   if (error) {
+    console.error("[OAuth Callback] OAuth provider error:", error);
     return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
   // If no code, redirect to login
   if (!code) {
+    console.error("[OAuth Callback] No code parameter");
     return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
@@ -33,16 +37,11 @@ export async function GET(request: Request) {
           return cookieStore.getAll();
         },
         setAll(cookiesToSet) {
+          console.log(`[OAuth Callback] Setting ${cookiesToSet.length} cookies`);
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
-            // Set cookies on the response object so they persist after redirect
-            // IMPORTANT: Use Supabase's exact options to preserve PKCE code verifier
-            // Only override secure if needed for HTTPS
-            response.cookies.set(name, value, {
-              ...options,
-              // Ensure secure cookies in production (HTTPS) but preserve all other settings
-              secure: options?.secure ?? (origin.startsWith("https://") || process.env.NODE_ENV === "production"),
-            });
+            // Use Supabase's exact cookie options - don't override
+            response.cookies.set(name, value, options);
           });
         },
       },
@@ -50,27 +49,28 @@ export async function GET(request: Request) {
   );
 
   // Exchange the code for a session
+  console.log("[OAuth Callback] Exchanging code for session...");
   const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
   if (exchangeError) {
-    // Log error in production for debugging
-    if (process.env.NODE_ENV === "production") {
-      console.error("[OAuth Callback] Code exchange failed:", {
-        message: exchangeError.message,
-        status: exchangeError.status,
-        origin,
-      });
-    }
+    console.error("[OAuth Callback] Code exchange failed:", {
+      message: exchangeError.message,
+      status: exchangeError.status,
+    });
     return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
   // Verify session was created
   if (!data.session) {
-    if (process.env.NODE_ENV === "production") {
-      console.error("[OAuth Callback] No session after code exchange");
-    }
+    console.error("[OAuth Callback] No session after code exchange");
     return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
+
+  console.log("[OAuth Callback] Session created successfully", {
+    userId: data.session.user.id,
+    email: data.session.user.email,
+    redirectingTo: `${origin}${next}`,
+  });
 
   // Return the response with cookies set
   return response;
