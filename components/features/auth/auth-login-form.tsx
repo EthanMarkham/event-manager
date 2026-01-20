@@ -79,17 +79,8 @@ export function AuthLoginForm({
   const isBusy = form.formState.isSubmitting || Boolean(isGooglePending);
 
   function handleGoogleSignIn() {
-    startGoogleTransition(async () => {
-      const result = await signInWithGoogleAction();
-      if (!result.ok) {
-        toast.error(result.message);
-        return;
-      }
-
-      if (result.data?.url) {
-        window.location.href = result.data.url;
-      }
-    });
+    // Use Route Handler instead of Server Action to ensure PKCE cookies are set properly
+    window.location.href = "/auth/google";
   }
 
   return (

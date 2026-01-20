@@ -36,12 +36,12 @@ export async function GET(request: Request) {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
             // Set cookies on the response object so they persist after redirect
-            // Preserve Supabase's options but ensure secure cookies in production
+            // IMPORTANT: Use Supabase's exact options to preserve PKCE code verifier
+            // Only override secure if needed for HTTPS
             response.cookies.set(name, value, {
               ...options,
-              // Ensure secure cookies in production (HTTPS)
-              secure: origin.startsWith("https://") || process.env.NODE_ENV === "production",
-              sameSite: (options?.sameSite as "lax" | "strict" | "none") || "lax",
+              // Ensure secure cookies in production (HTTPS) but preserve all other settings
+              secure: options?.secure ?? (origin.startsWith("https://") || process.env.NODE_ENV === "production"),
             });
           });
         },
