@@ -1,0 +1,100 @@
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+import { eventWithVenuesSchema } from "@/lib/validation/db";
+import type { EventActionInput } from "@/lib/validation/events";
+import { logger } from "@/lib/utils/logger";
+import type { QueryResult } from "@/lib/queries/result";
+
+type EventWithVenues = z.infer<typeof eventWithVenuesSchema>;
+
+export async function getEventsForDashboard({
+  searchQuery,
+  sportFilter,
+  userId,
+}: {
+  searchQuery?: string;
+  sportFilter?: string;
+  userId: string;
+}): Promise<QueryResult<EventWithVenues[]>> {
+  // Server-first read that returns the normalized EventWithVenues shape.
+  // Results are already scoped to the authenticated user by:
+  // - explicit `user_id` filter here
+  // - Postgres RLS policies in `database/schema.sql`
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("events")
+    .select("id, name, sport_type, starts_at, description, event_venues(name)")
+    .eq("user_id", userId)
+    .order("starts_at", { ascending: true });
+
+  if (searchQuery?.trim()) {
+    query = query.ilike("name", `%${searchQuery.trim()}%`);
+  }
+
+  if (sportFilter) {
+    query = query.eq("sport_type", sportFilter);
+  }
+
+  const { data: events, error } = await query;
+
+  if (error) {
+    logger.error("Events query failed", { error, userId });
+    return { ok: false, error: "query_failed" };
+  }
+
+  const parsed = z.array(eventWithVenuesSchema).safeParse(events ?? []);
+  if (!parsed.success) {
+    logger.error("Events query returned invalid data", {
+      error: parsed.error.flatten(),
+      userId,
+    });
+    return { ok: false, error: "invalid_data" };
+  }
+
+  return { ok: true, data: parsed.data };
+}
+
+export async function getEventForEdit(
+  eventId: string,
+  userId: string
+): Promise<QueryResult<EventActionInput>> {
+  const supabase = await createClient();
+
+  const { data: event, error } = await supabase
+    .from("events")
+    .select("id, name, sport_type, starts_at, description, event_venues(name)")
+    .eq("id", eventId)
+    .eq("user_id", userId)
+    .single();
+
+  if (error || !event) {
+    if (error) {
+      logger.error("Event fetch failed", { error, eventId, userId });
+      return { ok: false, error: "query_failed" };
+    }
+    return { ok: false, error: "not_found" };
+  }
+
+  const parsed = eventWithVenuesSchema.safeParse(event);
+  if (!parsed.success) {
+    logger.error("Event fetch returned invalid data", {
+      error: parsed.error.flatten(),
+      eventId,
+      userId,
+    });
+    return { ok: false, error: "invalid_data" };
+  }
+
+  const eventWithVenues = parsed.data;
+  return {
+    ok: true,
+    data: {
+      name: eventWithVenues.name,
+      sport_type: eventWithVenues.sport_type,
+      starts_at: eventWithVenues.starts_at,
+      description: eventWithVenues.description ?? undefined,
+      venues: eventWithVenues.event_venues?.map((venue) => venue.name) ?? [],
+    },
+  };
+}
