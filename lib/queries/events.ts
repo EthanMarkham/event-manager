@@ -63,20 +63,34 @@ export async function getEventForEdit(
 
   const { data: event, error } = await supabase
     .from("events")
-    .select("id, name, sport_type, starts_at, description, event_venues(name)")
+    .select("id, name, sport_type, starts_at, description")
     .eq("id", eventId)
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
-  if (error || !event) {
-    if (error) {
-      logger.error("Event fetch failed", { error, eventId, userId });
-      return { ok: false, error: "query_failed" };
-    }
+  if (error) {
+    logger.error("Event fetch failed", { error, eventId, userId });
+    return { ok: false, error: "query_failed" };
+  }
+  if (!event) {
     return { ok: false, error: "not_found" };
   }
 
-  const parsed = eventWithVenuesSchema.safeParse(event);
+  const { data: venues, error: venuesError } = await supabase
+    .from("event_venues")
+    .select("name")
+    .eq("event_id", eventId)
+    .order("created_at", { ascending: true });
+
+  if (venuesError) {
+    logger.error("Event venues fetch failed", { error: venuesError, eventId, userId });
+    return { ok: false, error: "query_failed" };
+  }
+
+  const parsed = eventWithVenuesSchema.safeParse({
+    ...event,
+    event_venues: venues ?? [],
+  });
   if (!parsed.success) {
     logger.error("Event fetch returned invalid data", {
       error: parsed.error.flatten(),
