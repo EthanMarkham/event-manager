@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/result";
 import { normalizeSupabaseError } from "@/lib/actions/result";
@@ -35,6 +36,9 @@ export async function exchangeOAuthCode(
   if (error) {
     return { ok: false, message: normalizeSupabaseError(error) };
   }
+
+  // Revalidate the path to ensure Next.js recognizes the new session
+  revalidatePath("/", "layout");
 
   return { ok: true, data: undefined };
 }
