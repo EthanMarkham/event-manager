@@ -83,7 +83,11 @@ export function DashboardRealtime({
 
   return (
     <div className="space-y-4">
-      <DashboardFilters searchQuery={searchQuery} sportFilter={sportFilter} />
+      <DashboardFilters
+        key={`${searchQuery ?? ""}-${sportFilter ?? "all"}`}
+        searchQuery={searchQuery}
+        sportFilter={sportFilter}
+      />
       <div className="md:hidden">
         <DashboardList events={events} hasActiveFilters={hasActiveFilters} />
       </div>
