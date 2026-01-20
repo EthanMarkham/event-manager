@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { AUTH_ERROR_OAUTH_FAILED } from "@/lib/validation/auth";
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   }
 
   // Create response object first so we can set cookies on it
-  const response = NextResponse.redirect(`${origin}${next}`);
+  let response = NextResponse.redirect(`${origin}${next}`);
   const cookieStore = await cookies();
 
   // Create Supabase client with cookie handlers that set cookies on the response
@@ -29,17 +29,15 @@ export async function GET(request: Request) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
+        getAll() {
+          return cookieStore.getAll();
         },
-        set(name: string, value: string, options: CookieOptions) {
-          // Set cookies on both the cookie store and the response object
-          cookieStore.set(name, value, options);
-          response.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: CookieOptions) {
-          cookieStore.set(name, "", { ...options, maxAge: 0 });
-          response.cookies.set({ name, value: "", ...options });
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+            // Set cookies on the response object so they persist after redirect
+            response.cookies.set(name, value, options);
+          });
         },
       },
     }
