@@ -9,6 +9,13 @@ export async function getServerUser() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  
+  if (user) {
+    console.log("[Auth] User found:", user.email);
+  } else {
+    console.log("[Auth] No user session found");
+  }
+  
   return user;
 }
 

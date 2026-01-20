@@ -26,9 +26,9 @@ async function handleSignOut() {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams?: SearchParams;
+  searchParams?: Promise<SearchParams>;
 }) {
-  const params = searchParams ?? {};
+  const params = (await searchParams) ?? {};
   const searchQuery = typeof params.q === "string" ? params.q : params.q?.[0];
   const sportFilter =
     typeof params.sport === "string" ? params.sport : params.sport?.[0];
