@@ -36,7 +36,13 @@ export async function GET(request: Request) {
           cookiesToSet.forEach(({ name, value, options }) => {
             cookieStore.set(name, value, options);
             // Set cookies on the response object so they persist after redirect
-            response.cookies.set(name, value, options);
+            // Preserve Supabase's options but ensure secure cookies in production
+            response.cookies.set(name, value, {
+              ...options,
+              // Ensure secure cookies in production (HTTPS)
+              secure: origin.startsWith("https://") || process.env.NODE_ENV === "production",
+              sameSite: (options?.sameSite as "lax" | "strict" | "none") || "lax",
+            });
           });
         },
       },
