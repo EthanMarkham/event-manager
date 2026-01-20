@@ -1,7 +1,5 @@
 import { z } from "zod";
 
-export const AUTH_ERROR_OAUTH_FAILED = "oauth_failed" as const;
-
 export const authFormSchema = z.object({
   email: z
     .string()

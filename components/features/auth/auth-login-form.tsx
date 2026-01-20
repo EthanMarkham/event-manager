@@ -1,11 +1,10 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { authFormSchema, AUTH_ERROR_OAUTH_FAILED, type AuthFormValues } from "@/lib/validation/auth";
+import { authFormSchema, type AuthFormValues } from "@/lib/validation/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,20 +23,11 @@ import { AuthLoginToggle } from "./auth-login-toggle";
 import { signInAction, signUpAction } from "@/lib/actions/auth";
 import { applyServerFieldErrors } from "@/lib/forms/apply-server-field-errors";
 import { toast } from "@/lib/notifications/toast";
-import { getBrowserClient } from "@/lib/supabase/client";
 
-type AuthLoginFormProps = {
-  initialError?: string;
-};
-
-export function AuthLoginForm({
-  initialError,
-}: AuthLoginFormProps) {
+export function AuthLoginForm() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
   const [signUpNotice, setSignUpNotice] = useState<string | null>(null);
-  const [isGooglePending, startGoogleTransition] = useTransition();
-  const lastShownErrorRef = useRef<string | undefined>(undefined);
 
   const form = useForm<AuthFormValues>({
     resolver: zodResolver(authFormSchema),
@@ -46,13 +36,6 @@ export function AuthLoginForm({
       password: "",
     },
   });
-
-  useEffect(() => {
-    if (initialError === AUTH_ERROR_OAUTH_FAILED && lastShownErrorRef.current !== initialError) {
-      lastShownErrorRef.current = initialError;
-      toast.error("OAuth authentication failed. Please try again.");
-    }
-  }, [initialError]);
 
   const handleEmailSubmit: SubmitHandler<AuthFormValues> = async (data) => {
     setSignUpNotice(null);
@@ -77,26 +60,7 @@ export function AuthLoginForm({
     router.refresh();
   };
 
-  const isBusy = form.formState.isSubmitting || Boolean(isGooglePending);
-
-  function handleGoogleSignIn() {
-    startGoogleTransition(async () => {
-      const supabase = getBrowserClient();
-      const siteUrl = window.location.origin;
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${siteUrl}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-    });
-  }
+  const isBusy = form.formState.isSubmitting;
 
   return (
     <Card className="border-border/60 bg-card/75 shadow-xl shadow-primary/10 backdrop-blur-xl">
@@ -160,34 +124,6 @@ export function AuthLoginForm({
             </Button>
           </form>
         </Form>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-          </div>
-        </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleGoogleSignIn}
-          disabled={isBusy}
-        >
-          {isGooglePending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          <Image
-            src="/google.svg"
-            alt=""
-            aria-hidden="true"
-            className="mr-2 h-4 w-4"
-            width={16}
-            height={16}
-          />
-          Continue with Google
-        </Button>
 
         <AuthLoginToggle
           isSignUp={isSignUp}

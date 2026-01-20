@@ -70,17 +70,6 @@ When deploying to Vercel, configure these environment variables in your project 
 - `SUPABASE_SERVICE_ROLE_KEY` - Your Supabase service role key (add as a secret)
 - `PLAYWRIGHT_TEST_BASE_URL` - Your production or preview URL
 
-**Google OAuth Setup:**
-
-1. In your Supabase dashboard, go to Authentication > Providers > Google
-2. Enable Google provider and configure your OAuth credentials
-3. Add your authorized redirect URLs:
-   - `http://localhost:3000/auth/callback` (for local development)
-   - `https://your-app.vercel.app/auth/callback` (for production)
-   - `https://*.vercel.app/auth/callback` (for preview deployments, optional)
-
-The `NEXT_PUBLIC_SITE_URL` environment variable is used to construct the OAuth redirect URL. Make sure it matches your actual deployment URL.
-
 ### Repo conventions (stack-aligned)
 
 - **Auth gating**: handled in `app/(protected)/layout.tsx` via server redirect (no client auth gates).
@@ -91,7 +80,7 @@ The `NEXT_PUBLIC_SITE_URL` environment variable is used to construct the OAuth r
 ### Architecture & folder structure
 
 - **Routes**: `app/*`
-  - Public routes (e.g. `app/login`, `app/auth/callback`)
+  - Public routes (e.g. `app/login`)
   - Protected routes under `app/(protected)/*` (auth enforced once in `app/(protected)/layout.tsx`)
 - **UI components**:
   - `components/ui/*` – shadcn-style primitives (button, card, dialog, form, inputs, table, etc.)
@@ -135,7 +124,5 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 2. Import your repository in Vercel
 3. Configure the environment variables (see above)
 4. Deploy
-
-Vercel will automatically detect Next.js and configure the build settings. Make sure to set `NEXT_PUBLIC_SITE_URL` to your Vercel deployment URL for OAuth callbacks to work correctly.
 
 Check out the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
