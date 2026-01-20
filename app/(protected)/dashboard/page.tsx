@@ -8,8 +8,8 @@ import { LogOut, Plus } from "@/lib/ui/icons";
 import { redirect } from "next/navigation";
 
 type SearchParams = {
-  q?: string;
-  sport?: string;
+  q?: string | string[];
+  sport?: string | string[];
 };
 
 async function handleSignOut() {
@@ -29,6 +29,9 @@ export default async function DashboardPage({
   searchParams?: SearchParams;
 }) {
   const params = searchParams ?? {};
+  const searchQuery = typeof params.q === "string" ? params.q : params.q?.[0];
+  const sportFilter =
+    typeof params.sport === "string" ? params.sport : params.sport?.[0];
 
   return (
     <div className="container mx-auto space-y-6 p-4">
@@ -54,7 +57,7 @@ export default async function DashboardPage({
       </div>
 
       <Suspense fallback={<DashboardSkeleton />}>
-        <DashboardContent searchQuery={params.q} sportFilter={params.sport} />
+        <DashboardContent searchQuery={searchQuery} sportFilter={sportFilter} />
       </Suspense>
     </div>
   );

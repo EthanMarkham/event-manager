@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { DashboardFilters } from "./filters";
 import { DashboardList } from "./list";
 import { DashboardTable } from "./table";
@@ -81,21 +81,41 @@ export function DashboardRealtime({
     updateVenue,
   ]);
 
-  const hasActiveFilters = Boolean(searchQuery?.trim() || sportFilter);
+  const normalizedSearchQuery = searchQuery?.trim().toLowerCase() ?? "";
+  const normalizedSportFilter = sportFilter?.trim() ?? "";
+
+  const filteredEvents = useMemo(() => {
+    if (!normalizedSearchQuery && !normalizedSportFilter) {
+      return events;
+    }
+
+    return events.filter((event) => {
+      if (normalizedSportFilter && event.sport_type !== normalizedSportFilter) {
+        return false;
+      }
+
+      if (normalizedSearchQuery) {
+        return event.name.toLowerCase().includes(normalizedSearchQuery);
+      }
+
+      return true;
+    });
+  }, [events, normalizedSearchQuery, normalizedSportFilter]);
+
+  const hasActiveFilters = Boolean(normalizedSearchQuery || normalizedSportFilter);
 
   return (
     <div className="space-y-4">
       <DashboardFilters
-        key={`${searchQuery ?? ""}-${sportFilter ?? "all"}`}
         searchQuery={searchQuery}
         sportFilter={sportFilter}
         filtersAction={filtersAction}
       />
       <div className="md:hidden">
-        <DashboardList events={events} hasActiveFilters={hasActiveFilters} />
+        <DashboardList events={filteredEvents} hasActiveFilters={hasActiveFilters} />
       </div>
       <div className="hidden md:block">
-        <DashboardTable events={events} hasActiveFilters={hasActiveFilters} />
+        <DashboardTable events={filteredEvents} hasActiveFilters={hasActiveFilters} />
       </div>
     </div>
   );

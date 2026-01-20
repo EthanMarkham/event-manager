@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -30,6 +30,16 @@ export function DashboardFilters({
   const [searchValue, setSearchValue] = useState(searchQuery ?? "");
   const [sportValue, setSportValue] = useState(sportFilter ?? "all");
   const hiddenSportValue = sportValue === "all" ? "" : sportValue;
+  const normalizedSearchQuery = searchQuery ?? "";
+  const normalizedSportFilter = sportFilter ?? "all";
+
+  useEffect(() => {
+    setSearchValue(normalizedSearchQuery);
+  }, [normalizedSearchQuery]);
+
+  useEffect(() => {
+    setSportValue(normalizedSportFilter);
+  }, [normalizedSportFilter]);
 
   return (
     <form
