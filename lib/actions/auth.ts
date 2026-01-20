@@ -68,29 +68,6 @@ export async function signInAction(input: AuthFormValues): Promise<ActionResult<
   return { ok: true, data: undefined };
 }
 
-export async function signInWithGoogleAction(): Promise<ActionResult<{ url?: string }>> {
-  const supabase = await createClient();
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: {
-      redirectTo: `${siteUrl}/auth/callback`,
-    },
-  });
-
-  if (error) {
-    return { ok: false, message: normalizeSupabaseError(error) };
-  }
-
-  if (data.url) {
-    return { ok: true, data: { url: data.url } };
-  }
-
-  return { ok: false, message: "Failed to initiate Google sign-in" };
-}
-
 export async function signOutAction(): Promise<ActionResult<void>> {
   const supabase = await createClient();
   const { error } = await supabase.auth.signOut();

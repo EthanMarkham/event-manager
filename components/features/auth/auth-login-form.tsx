@@ -21,9 +21,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "@/lib/ui/icons";
 import { AuthLoginHeader } from "./auth-login-header";
 import { AuthLoginToggle } from "./auth-login-toggle";
-import { signInAction, signInWithGoogleAction, signUpAction } from "@/lib/actions/auth";
+import { signInAction, signUpAction } from "@/lib/actions/auth";
 import { applyServerFieldErrors } from "@/lib/forms/apply-server-field-errors";
 import { toast } from "@/lib/notifications/toast";
+import { getBrowserClient } from "@/lib/supabase/client";
 
 type AuthLoginFormProps = {
   initialError?: string;
@@ -80,14 +81,19 @@ export function AuthLoginForm({
 
   function handleGoogleSignIn() {
     startGoogleTransition(async () => {
-      const result = await signInWithGoogleAction();
-      if (!result.ok) {
-        toast.error(result.message);
-        return;
-      }
+      const supabase = getBrowserClient();
+      const siteUrl = window.location.origin;
 
-      if (result.data?.url) {
-        window.location.href = result.data.url;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${siteUrl}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
       }
     });
   }
