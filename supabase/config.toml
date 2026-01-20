@@ -1,0 +1,26 @@
+# Supabase Configuration
+# This file is used by Supabase CLI and local development tools
+
+[project]
+# Your Supabase project reference ID
+# You can find this in your Supabase dashboard under Settings > General
+
+[auth]
+# Auth configuration
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+
+[api]
+# API configuration
+enabled = true
+port = 54321
+
+[db]
+# Database configuration
+port = 54322
+
+[studio]
+# Studio configuration
+enabled = true
+port = 54323
