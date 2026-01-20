@@ -29,21 +29,20 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired - this is critical for maintaining auth state
-  await supabase.auth.getUser();
+  // Refresh session if expired
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user && request.nextUrl.pathname === "/dashboard") {
+    console.log("[Middleware] No user on dashboard, redirecting to login");
+  } else if (user && request.nextUrl.pathname === "/dashboard") {
+    console.log("[Middleware] User found on dashboard:", user.email);
+  }
 
   return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

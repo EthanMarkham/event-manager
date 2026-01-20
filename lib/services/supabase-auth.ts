@@ -1,31 +1,19 @@
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { ActionResult } from "@/lib/actions/result";
-import { normalizeSupabaseError } from "@/lib/actions/result";
 
 export async function getServerUser() {
   const supabase = await createClient();
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser();
-  
-  if (error) {
-    console.error("[Auth] Error getting user:", error.message);
-  } else if (user) {
-    console.log("[Auth] User found:", user.email);
-  } else {
-    console.log("[Auth] No user session found");
-  }
-  
   return user;
 }
 
 export async function requireServerUser(redirectTo = "/login") {
   const user = await getServerUser();
   if (!user) {
-    console.log(`[Auth] Redirecting to ${redirectTo} - no authenticated user`);
+    console.log("[Auth] No user found, redirecting to login");
     redirect(redirectTo);
   }
   return user;
@@ -36,22 +24,6 @@ export async function redirectIfAuthenticated(redirectTo = "/dashboard") {
   if (user) {
     redirect(redirectTo);
   }
-}
-
-export async function exchangeOAuthCode(
-  code: string
-): Promise<ActionResult<void>> {
-  const supabase = await createClient();
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-  if (error) {
-    return { ok: false, message: normalizeSupabaseError(error) };
-  }
-
-  // Revalidate the path to ensure Next.js recognizes the new session
-  revalidatePath("/", "layout");
-
-  return { ok: true, data: undefined };
 }
 
 /**

@@ -21,7 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "@/lib/ui/icons";
 import { AuthLoginHeader } from "./auth-login-header";
 import { AuthLoginToggle } from "./auth-login-toggle";
-import { signInAction, signUpAction } from "@/lib/actions/auth";
+import { signInAction, signInWithGoogleAction, signUpAction } from "@/lib/actions/auth";
 import { applyServerFieldErrors } from "@/lib/forms/apply-server-field-errors";
 import { toast } from "@/lib/notifications/toast";
 
@@ -79,8 +79,17 @@ export function AuthLoginForm({
   const isBusy = form.formState.isSubmitting || Boolean(isGooglePending);
 
   function handleGoogleSignIn() {
-    // Use Route Handler instead of Server Action to ensure PKCE cookies are set properly
-    window.location.href = "/auth/google";
+    startGoogleTransition(async () => {
+      const result = await signInWithGoogleAction();
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+
+      if (result.data?.url) {
+        window.location.href = result.data.url;
+      }
+    });
   }
 
   return (
