@@ -123,3 +123,40 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .bg-app-gradient {
+    background-image:
+      radial-gradient(
+        1200px circle at 12% -10%,
+        color-mix(in oklch, var(--primary) 32%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        900px circle at 90% 0%,
+        color-mix(in oklch, var(--accent) 40%, transparent),
+        transparent 55%
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--background) 92%, var(--primary) 8%),
+        var(--background)
+      );
+  }
+
+  .bg-app-grid {
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in oklch, var(--border) 38%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--border) 38%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 56px 56px;
+    background-position: center;
+  }
+}

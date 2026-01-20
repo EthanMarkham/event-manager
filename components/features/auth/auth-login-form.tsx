@@ -93,7 +93,7 @@ export function AuthLoginForm({
   }
 
   return (
-    <Card>
+    <Card className="border-border/60 bg-card/75 shadow-xl shadow-primary/10 backdrop-blur-xl">
       <AuthLoginHeader isSignUp={isSignUp} />
       <CardContent className="space-y-4">
         {signUpNotice && (
