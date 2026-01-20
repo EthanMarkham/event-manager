@@ -1,36 +1,49 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { normalizeSupabaseError } from "@/lib/actions/result";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import { AUTH_ERROR_OAUTH_FAILED } from "@/lib/validation/auth";
-import { revalidatePath } from "next/cache";
 
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get("code");
-  const error = requestUrl.searchParams.get("error");
+  const { searchParams, origin } = new URL(request.url);
+  const code = searchParams.get("code");
+  const error = searchParams.get("error");
 
   // Handle OAuth errors from the provider
   if (error) {
-    redirect(`/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
+    return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
   // If no code, redirect to login
   if (!code) {
-    redirect(`/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
+    return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
+  // Create Supabase client with direct cookie access for Route Handler
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
   // Exchange the code for a session
-  // Use Route Handler to properly set cookies
-  const supabase = await createClient();
   const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
   if (exchangeError) {
-    redirect(`/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
+    return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
-  // Revalidate the path to ensure Next.js recognizes the new session
-  revalidatePath("/", "layout");
-
   // Redirect to dashboard after successful authentication
-  redirect("/dashboard");
+  return NextResponse.redirect(`${origin}/dashboard`);
 }
