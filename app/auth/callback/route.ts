@@ -50,9 +50,25 @@ export async function GET(request: Request) {
   );
 
   // Exchange the code for a session
-  const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
   if (exchangeError) {
+    // Log error in production for debugging
+    if (process.env.NODE_ENV === "production") {
+      console.error("[OAuth Callback] Code exchange failed:", {
+        message: exchangeError.message,
+        status: exchangeError.status,
+        origin,
+      });
+    }
+    return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
+  }
+
+  // Verify session was created
+  if (!data.session) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("[OAuth Callback] No session after code exchange");
+    }
     return NextResponse.redirect(`${origin}/login?error=${AUTH_ERROR_OAUTH_FAILED}`);
   }
 
