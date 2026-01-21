@@ -5,4 +5,4 @@ export { DashboardEmptyState } from "./empty-state";
 export { DashboardList } from "./list";
 export { DashboardTable } from "./table";
 export { DashboardErrorCard } from "./dashboard-error-card";
-export { DashboardRealtime } from "./realtime-dashboard";
+export { DashboardResults } from "./dashboard-results";

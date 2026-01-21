@@ -4,12 +4,9 @@ import { cookies } from "next/headers";
 /**
  * Supabase server client factory.
  *
- * This is the only entrypoint for non-realtime Supabase reads/writes.
+ * This is the only entrypoint for Supabase reads/writes.
  * It is used by Server Components, Server Actions, and query/repository
  * layers to perform all CRUD operations against the database.
- *
- * For browser-side realtime subscriptions, use `getBrowserClient` from
- * `lib/supabase/client` instead of calling Supabase directly.
  */
 export async function createClient() {
   const cookieStore = await cookies();
