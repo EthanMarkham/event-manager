@@ -1,5 +1,5 @@
 import { DashboardErrorCard } from "./dashboard-error-card";
-import { DashboardRealtime } from "./realtime-dashboard";
+import { DashboardResults } from "./dashboard-results";
 import { getServerUser } from "@/lib/services/supabase-auth";
 import { getEventsForDashboard } from "@/lib/queries/events";
 
@@ -38,9 +38,10 @@ export async function DashboardContent({
   }
 
   return (
-    <DashboardRealtime
+    <DashboardResults
       initialEvents={result.data}
-      userId={user.id}
+      searchQuery={searchQuery}
+      sportFilter={sportFilter}
     />
   );
 }

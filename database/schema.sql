@@ -4,7 +4,6 @@
 -- This schema is designed to work with the app's RLS-first model:
 -- - Application code always queries data for the current auth.uid()
 -- - Ownership is enforced by Postgres Row Level Security policies
--- - Realtime subscriptions apply the same user_id scoping
 
 -- Create events table
 CREATE TABLE IF NOT EXISTS events (
