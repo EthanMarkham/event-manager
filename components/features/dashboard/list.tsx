@@ -28,9 +28,9 @@ export function DashboardList({
           className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-lg leading-tight">{event.name}</CardTitle>
+            <CardHeader className="pb-1">
+              <div className="flex items-start justify-between gap-2 min-w-0">
+                <CardTitle className="text-base md:text-lg leading-tight truncate min-w-0 flex-1">{event.name}</CardTitle>
                 <Badge variant="secondary" className="shrink-0">
                   {event.sport_type}
                 </Badge>
