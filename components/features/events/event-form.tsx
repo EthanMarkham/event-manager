@@ -31,6 +31,7 @@ type EventFormProps = {
   onSuccess?: (result: ActionResult<{ id: string }> & { ok: true }) => void;
   submitLabel?: string;
   successMessage?: string;
+  deleteButton?: React.ReactNode;
 };
 
 type FormValues = EventFormValues;
@@ -41,6 +42,7 @@ export function EventForm({
   onSuccess,
   submitLabel = "Create Event",
   successMessage,
+  deleteButton,
 }: EventFormProps) {
   const router = useRouter();
   const form = useForm<FormValues>({
@@ -56,7 +58,7 @@ export function EventForm({
       onSuccess,
       successMessage,
       navigate: () => {
-        router.push("/dashboard");
+        router.back();
         router.refresh();
       },
     };
@@ -71,11 +73,13 @@ export function EventForm({
         className="space-y-6"
         aria-busy={isSubmitting}
       >
-        <EventNameField control={form.control} isSubmitting={isSubmitting} />
-        <EventSportTypeField
-          control={form.control}
-          isSubmitting={isSubmitting}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <EventNameField control={form.control} isSubmitting={isSubmitting} />
+          <EventSportTypeField
+            control={form.control}
+            isSubmitting={isSubmitting}
+          />
+        </div>
         <EventStartsAtField
           control={form.control}
           isSubmitting={isSubmitting}
@@ -91,15 +95,16 @@ export function EventForm({
           isSubmitting={isSubmitting}
         />
 
-        <div className="flex gap-4 pt-4">
+        <div className="flex items-center gap-2 pt-4">
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {submitLabel}
           </Button>
+          {deleteButton && <div>{deleteButton}</div>}
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.back()}
             disabled={isSubmitting}
           >
             Cancel

@@ -50,7 +50,7 @@ export function EventDeleteDialog({
         return;
       }
 
-      router.push("/dashboard");
+      router.back();
       router.refresh();
     });
   }
