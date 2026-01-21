@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { eventWithVenuesSchema } from "@/lib/validation/db";
+import { eventWithVenuesSchema, eventWithVenuesAndUserSchema } from "@/lib/validation/db";
 import type { EventActionInput } from "@/lib/validation/events";
 import { logger } from "@/lib/utils/logger";
 import type { QueryResult } from "@/lib/queries/result";
@@ -112,4 +112,36 @@ export async function getEventForEdit(
       venues: eventWithVenues.event_venues?.map((venue) => venue.name) ?? [],
     },
   };
+}
+
+export async function getEventForView(
+  eventId: string
+): Promise<QueryResult<z.infer<typeof eventWithVenuesAndUserSchema>>> {
+  const supabase = await createClient();
+
+  const { data: event, error } = await supabase
+    .from("events")
+    .select("id, user_id, name, sport_type, starts_at, description, event_venues(name)")
+    .eq("id", eventId)
+    .maybeSingle();
+
+  if (error) {
+    logger.error("Event view fetch failed", { error, eventId });
+    return { ok: false, error: "query_failed" };
+  }
+  if (!event) {
+    logger.error("Event not found", { eventId });
+    return { ok: false, error: "not_found" };
+  }
+
+  const parsed = eventWithVenuesAndUserSchema.safeParse(event);
+  if (!parsed.success) {
+    logger.error("Event view fetch returned invalid data", {
+      error: parsed.error.flatten(),
+      eventId,
+    });
+    return { ok: false, error: "invalid_data" };
+  }
+
+  return { ok: true, data: parsed.data };
 }

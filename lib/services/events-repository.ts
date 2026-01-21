@@ -56,6 +56,7 @@ export class SupabaseEventsRepository implements EventsRepository {
         description: data.description || null,
       })
       .eq("id", id)
+      .eq("user_id", userId)
       .select("id")
       .maybeSingle();
 
@@ -65,7 +66,7 @@ export class SupabaseEventsRepository implements EventsRepository {
     }
 
     if (!updated) {
-      throw new Error("Event not found");
+      throw new Error("Event not found or you do not have permission to edit it");
     }
 
     return { id: updated.id };
@@ -76,6 +77,7 @@ export class SupabaseEventsRepository implements EventsRepository {
       .from("events")
       .delete()
       .eq("id", id)
+      .eq("user_id", userId)
       .select("id")
       .maybeSingle();
 
@@ -85,7 +87,7 @@ export class SupabaseEventsRepository implements EventsRepository {
     }
 
     if (!deleted) {
-      throw new Error("Event not found");
+      throw new Error("Event not found or you do not have permission to delete it");
     }
   }
 

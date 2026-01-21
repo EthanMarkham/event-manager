@@ -15,3 +15,10 @@ export const eventWithVenuesSchema = z.object({
 });
 
 export type EventWithVenues = z.infer<typeof eventWithVenuesSchema>;
+
+// Public/owner-aware shape (includes user_id for ownership checks in UI).
+export const eventWithVenuesAndUserSchema = eventWithVenuesSchema.extend({
+  user_id: z.string(),
+});
+
+export type EventWithVenuesAndUser = z.infer<typeof eventWithVenuesAndUserSchema>;
