@@ -33,7 +33,7 @@ export function DashboardTable({
     <div className="border rounded-lg">
       <UITable>
         <TableHeader>
-          <TableRow>
+          <TableRow className="hover:bg-transparent cursor-default">
             <TableHead className="w-[35%]">Name</TableHead>
             <TableHead className="w-[15%]">Sport</TableHead>
             <TableHead className="w-[25%]">Starts At</TableHead>
