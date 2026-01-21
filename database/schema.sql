@@ -58,13 +58,13 @@ CREATE TRIGGER update_events_updated_at
 ALTER TABLE events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_venues ENABLE ROW LEVEL SECURITY;
 
--- Policy: Allow authenticated users to read their own events
+-- Policy: Allow authenticated users to read all events (viewable by everyone)
 DROP POLICY IF EXISTS "Allow authenticated users to read events" ON events;
 DROP POLICY IF EXISTS "Users can read their own events" ON events;
-CREATE POLICY "Users can read their own events"
+CREATE POLICY "Authenticated users can read all events"
   ON events FOR SELECT
   TO authenticated
-  USING (auth.uid() = user_id);
+  USING (true);
 
 -- Policy: Allow authenticated users to insert their own events
 CREATE POLICY "Allow authenticated users to insert events"
@@ -92,7 +92,7 @@ DROP POLICY IF EXISTS "Allow authenticated users to insert event venues" ON even
 DROP POLICY IF EXISTS "Allow authenticated users to update event venues" ON event_venues;
 DROP POLICY IF EXISTS "Allow authenticated users to delete event venues" ON event_venues;
 
-CREATE POLICY "Users can read venues for their events"
+CREATE POLICY "Authenticated users can read venues for all events"
   ON event_venues FOR SELECT
   TO authenticated
   USING (
@@ -100,7 +100,6 @@ CREATE POLICY "Users can read venues for their events"
       SELECT 1
       FROM events e
       WHERE e.id = event_venues.event_id
-        AND e.user_id = auth.uid()
     )
   );
 

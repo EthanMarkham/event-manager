@@ -17,15 +17,13 @@ export async function getEventsForDashboard({
   userId: string;
 }): Promise<QueryResult<EventWithVenues[]>> {
   // Server-first read that returns the normalized EventWithVenues shape.
-  // Results are already scoped to the authenticated user by:
-  // - explicit `user_id` filter here
-  // - Postgres RLS policies in `database/schema.sql`
+  // RLS allows authenticated users to read all events (see database/schema.sql).
+  // The userId parameter is kept for logging purposes but no longer filters results.
   const supabase = await createClient();
 
   let query = supabase
     .from("events")
     .select("id, name, sport_type, starts_at, description, event_venues(name)")
-    .eq("user_id", userId)
     .order("starts_at", { ascending: true });
 
   if (searchQuery?.trim()) {
