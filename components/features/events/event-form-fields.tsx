@@ -1,7 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   FormControl,
   FormDescription,
@@ -17,7 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { SPORT_TYPES } from "@/lib/validation/events";
+import { CalendarIcon, Clock } from "@/lib/ui/icons";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { parseDateTimeLocal } from "@/lib/utils/dates";
 import type { Control } from "react-hook-form";
 import type { EventFormValues } from "@/lib/validation/events";
 
@@ -90,19 +98,117 @@ export function EventStartsAtField({
   control,
   isSubmitting,
 }: EventFormFieldProps) {
+  const timeInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <FormField
       control={control}
       name="starts_at"
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>Start Date & Time</FormLabel>
-          <FormControl>
-            <Input type="datetime-local" disabled={isSubmitting} {...field} />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        // Parse the datetime-local string to a Date object
+        const dateValue = field.value
+          ? new Date(parseDateTimeLocal(field.value))
+          : undefined;
+
+        // Parse time from datetime-local string
+        const timeValue = field.value
+          ? field.value.split("T")[1]?.slice(0, 5) || ""
+          : "";
+
+        return (
+          <FormItem>
+            <FormLabel>Start Date & Time</FormLabel>
+            <div className="flex gap-2">
+              <div className="flex-1 min-w-0">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal min-w-0",
+                          !dateValue && "text-muted-foreground"
+                        )}
+                        disabled={isSubmitting}
+                        type="button"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                        <span className="truncate">
+                          {dateValue ? (
+                            format(dateValue, "PPP")
+                          ) : (
+                            "Pick a date"
+                          )}
+                        </span>
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateValue}
+                      onSelect={(date) => {
+                        if (date) {
+                          // Combine selected date with existing time
+                          const dateStr = format(date, "yyyy-MM-dd");
+                          const timeStr = timeValue || "12:00";
+                          const newValue = `${dateStr}T${timeStr}`;
+                          field.onChange(newValue);
+                        }
+                      }}
+                      disabled={isSubmitting}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="relative flex-1 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (timeInputRef.current) {
+                      if (typeof timeInputRef.current.showPicker === "function") {
+                        timeInputRef.current.showPicker();
+                      } else {
+                        timeInputRef.current.focus();
+                      }
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Open time picker"
+                >
+                  <Clock className="h-4 w-4" />
+                </button>
+                <FormControl>
+                  <Input
+                    ref={timeInputRef}
+                    type="time"
+                    className="pl-9 [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none [&::-moz-calendar-picker-indicator]:hidden"
+                    style={{
+                      colorScheme: "light",
+                    }}
+                    value={timeValue}
+                    onChange={(e) => {
+                      const time = e.target.value;
+                      if (dateValue) {
+                        const dateStr = format(dateValue, "yyyy-MM-dd");
+                        field.onChange(`${dateStr}T${time}`);
+                      } else {
+                        // If no date selected, use today's date
+                        const today = format(new Date(), "yyyy-MM-dd");
+                        field.onChange(`${today}T${time}`);
+                      }
+                    }}
+                    disabled={isSubmitting}
+                  />
+                </FormControl>
+              </div>
+            </div>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }
