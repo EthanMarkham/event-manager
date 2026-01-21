@@ -37,9 +37,11 @@ export default async function DashboardPage({
   return (
     <AppBackground>
       <div className="container mx-auto space-y-6 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-bold">Events Dashboard</h1>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="min-w-0 truncate text-2xl font-bold sm:text-3xl">
+            Events Dashboard
+          </h1>
+          <div className="flex shrink-0 items-center gap-2">
             <form action={handleSignOut} className="relative">
               <FormPendingOverlay label="Signing out" />
               <Button type="submit" variant="outline" size="sm" aria-label="Logout">
