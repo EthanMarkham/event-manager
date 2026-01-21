@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request,
   });
@@ -33,9 +33,9 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user && request.nextUrl.pathname === "/dashboard") {
-    console.log("[Middleware] No user on dashboard, redirecting to login");
+    console.log("[Proxy] No user on dashboard, redirecting to login");
   } else if (user && request.nextUrl.pathname === "/dashboard") {
-    console.log("[Middleware] User found on dashboard:", user.email);
+    console.log("[Proxy] User found on dashboard:", user.email);
   }
 
   return response;
