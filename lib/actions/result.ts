@@ -31,28 +31,43 @@ export function zodErrorToFieldErrors(
 export function normalizeSupabaseError(error: unknown): string {
   if (error && typeof error === "object" && "message" in error) {
     const message = String(error.message);
+    const lower = message.toLowerCase();
     
     // Map common Supabase error patterns to friendly messages
-    if (message.includes("duplicate key") || message.includes("already exists")) {
+    if (lower.includes("duplicate key") || lower.includes("already exists")) {
       return "This record already exists";
     }
-    if (message.includes("foreign key") || message.includes("constraint")) {
+    if (lower.includes("foreign key") || lower.includes("constraint")) {
       return "Invalid reference to related data";
     }
-    if (message.includes("violates row-level security") || message.includes("RLS") || message.includes("permission")) {
+    if (
+      lower.includes("violates row-level security") ||
+      lower.includes("rls") ||
+      lower.includes("permission")
+    ) {
       return "You don't have permission to perform this action";
     }
-    if (message.includes("network") || message.includes("fetch") || message.includes("timeout")) {
+    if (lower.includes("network") || lower.includes("fetch") || lower.includes("timeout")) {
       return "Network error. Please check your connection and try again";
     }
-    if (message.includes("Invalid login") || message.includes("invalid credentials")) {
+    if (lower.includes("invalid login") || lower.includes("invalid credentials")) {
       return "Invalid email or password";
     }
-    if (message.includes("already registered") || message.includes("email already")) {
+    if (lower.includes("already registered") || lower.includes("email already")) {
       return "An account with this email already exists";
     }
-    if (message.includes("email") && message.includes("confirm")) {
+    // Covers sign-up flows where Supabase tells us a confirmation email was sent.
+    if (lower.includes("email") && lower.includes("confirm")) {
       return "Please check your email to confirm your account";
+    }
+    // Covers sign-in flows where Supabase fails "while waiting for confirmation"
+    // or similar wording. We keep this slightly vague to avoid obvious account
+    // enumeration, but still clue the user in about confirmation.
+    if (
+      lower.includes("waiting for confirmation") ||
+      (lower.includes("confirm") && lower.includes("not") && lower.includes("verified"))
+    ) {
+      return "Sign in failed. If you just created an account, please confirm it from your email before signing in.";
     }
     
     // For any other error, return a generic friendly message

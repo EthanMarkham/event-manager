@@ -56,7 +56,6 @@ export class SupabaseEventsRepository implements EventsRepository {
         description: data.description || null,
       })
       .eq("id", id)
-      .eq("user_id", userId)
       .select("id")
       .maybeSingle();
 
@@ -77,7 +76,6 @@ export class SupabaseEventsRepository implements EventsRepository {
       .from("events")
       .delete()
       .eq("id", id)
-      .eq("user_id", userId)
       .select("id")
       .maybeSingle();
 
