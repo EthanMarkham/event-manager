@@ -1,5 +1,6 @@
 export {
   AlertCircle,
+  Calendar as CalendarIcon,
   CalendarPlus,
   CheckIcon,
   ChevronDownIcon,
