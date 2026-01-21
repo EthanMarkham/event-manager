@@ -1,4 +1,4 @@
-## Event Manager (Fastbreak Event Dashboard)
+## Event Manager (Fastbreak AI Event Dashboard)
 
 ### Stack (expectations)
 

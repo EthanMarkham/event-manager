@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fastbreak Event Dashboard",
+  title: "Fastbreak AI Event Dashboard",
   description: "Manage your sports events",
 };
 

@@ -1,4 +1,4 @@
--- Fastbreak Event Dashboard Database Schema
+-- Fastbreak AI Event Dashboard Database Schema
 -- Run this SQL in your Supabase SQL Editor
 --
 -- This schema is designed to work with the app's RLS-first model:
